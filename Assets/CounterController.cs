@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Timers;
 using TMPro;
+using UnityEngine.InputSystem;
 using Object = System.Object;
 
 public class TimerToText : MonoBehaviour
@@ -8,13 +9,17 @@ public class TimerToText : MonoBehaviour
     private Timer _timer;
     private static long _counter;
     public TextMeshProUGUI timerText;
-    private int _days = 0;
-    private int _hours = 0;
-    private int _minutes = 0;
-    private int _seconds = 0;
+    private int _days;
+    private int _hours;
+    private int _minutes;
+    private int _seconds;
+    private Vector2 _mousePos;
 
     private void Start()
     {
+        _mousePos = Mouse.current.position.ReadValue();
+        
+        Debug.Log(_mousePos);
         _timer = new Timer(1000);
         _timer.Elapsed += OnTimedEvent; // Hook up the event
         _timer.AutoReset = true; // Restart timer after each event
@@ -28,6 +33,11 @@ public class TimerToText : MonoBehaviour
 
     private void Update()
     {
+        if (AnyKeyPressed())
+        {
+            Debug.Log("You moved!");
+            _timer.Enabled = false;
+        }
         PrintTimerToText();
     }
 
@@ -63,6 +73,16 @@ public class TimerToText : MonoBehaviour
         timer += $"{_seconds:D2}";
 
         timerText.text = timer;
+    }
+
+    private bool AnyKeyPressed()
+    {
+        if (Keyboard.current.anyKey.isPressed) return true;
+        if (Mouse.current.leftButton.isPressed) return true;
+        if (Mouse.current.rightButton.isPressed) return true;
+        if (Mouse.current.position.ReadValue() != _mousePos) return true;
+        
+        return false;
     }
     
     private static void OnTimedEvent(Object source, ElapsedEventArgs e)
